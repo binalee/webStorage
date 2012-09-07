@@ -27,46 +27,38 @@
       },
 
       getStorageCookie: function() {
-        var k, v, cookies = document.cookie.split(";");
-        for(var i=0; i < cookies.length; i++) {
-          k = cookies[i].substring(0, cookies[i].indexOf('='));
-          v = cookies[i].substring(cookies[i].indexOf('=') + 1);
-          k = k.replace(/^\s+|\s+$/g, "");//remove white space
-          if(k == 'storage') {
-            return JSON.parse(unescape(v));
-          }
+        var cookie = document.cookie;
+        var key = 'storage=';
+        var start_index = cookie.indexOf(key);
+        if(start_index != -1) {
+          start_index = start_index + key.length;
+          var end_index = cookie.indexOf(';', start_index);
+          end_index = (end_index == -1)? cookie.length : end_index;
+          var v = cookie.substring(start_index, end_index);
+          return JSON.parse(unescape(v));
         }
         return {};
       },
 
       setStorageCookie: function(value) {
         var domain = document.domain;
-        this.storage = this.getStorageCookie();
         if(typeof(value) === 'object') {
-
           value = JSON.stringify(value);
         }
         else {
           value = new Object(value);
           value = JSON.stringify(value);
         }
-        this.removeStorageCookie();
-        document.cookie += 'storage=' + escape(value) +
-                          ';path=/;domain=' + domain + ';';
+        document.cookie = 'storage=' + escape(value) +
+                          '; path=/; domain=' + domain + ';';
       },
 
       removeStorageCookie: function() {
-        var k, v, cookies = document.cookie.split(";");
-        for(var i=0; i < cookies.length; i++) {
-          k = cookies[i].substring(0, cookies[i].indexOf('='));
-          v = cookies[i].substring(cookies[i].indexOf('=') + 1);
-          k = k.replace(/^\s+|\s+$/g, "");//remove white space
-          if(k == 'storage') {
-            cookies.remove(i);
-            break;
-          }
-        }
-        document.cookie = cookies.join(';');
+        var exp = new Date();
+        var domain = document.domain;
+        exp.setDate( exp.getDate() - 1 );
+        document.cookie = 'storage=' + '; expires=' + exp.toGMTString() +
+                          '; path=/; domain=' + domain + ';';
       }
     }
   }
